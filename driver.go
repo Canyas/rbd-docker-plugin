@@ -132,7 +132,7 @@ func newCephRBDVolumeDriver(pluginName, cluster, userName, defaultPoolName, root
 //    { "Err": null }
 //    Respond with a string error if an error occurred.
 //
-func (d cephRBDVolumeDriver) Create(r dkvolume.CreateRequest) error {
+func (d cephRBDVolumeDriver) Create(r *dkvolume.CreateRequest) error {
 	log.Printf("INFO: Create(%q)", r)
 	d.m.Lock()
 	defer d.m.Unlock()
@@ -140,7 +140,7 @@ func (d cephRBDVolumeDriver) Create(r dkvolume.CreateRequest) error {
 	return d.createImage(r)
 }
 
-func (d cephRBDVolumeDriver) createImage(r dkvolume.CreateRequest) error {
+func (d cephRBDVolumeDriver) createImage(r *dkvolume.CreateRequest) error {
 	log.Printf("INFO: createImage(%q)", r)
 
 	fstype := *defaultImageFSType
@@ -214,7 +214,7 @@ func (d cephRBDVolumeDriver) createImage(r dkvolume.CreateRequest) error {
 //    { "Err": null }
 //    Respond with a string error if an error occurred.
 //
-func (d cephRBDVolumeDriver) Remove(r dkvolume.RemoveRequest) error {
+func (d cephRBDVolumeDriver) Remove(r *dkvolume.RemoveRequest) error {
 	log.Printf("INFO: Remove(%s)", r.Name)
 	d.m.Lock()
 	defer d.m.Unlock()
@@ -292,7 +292,7 @@ func (d cephRBDVolumeDriver) Remove(r dkvolume.RemoveRequest) error {
 //    Respond with the path on the host filesystem where the volume has been
 //    made available, and/or a string error if an error occurred.
 //
-func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) (*dkvolume.MountResponse, error) {
+func (d cephRBDVolumeDriver) Mount(r *dkvolume.MountRequest) (*dkvolume.MountResponse, error) {
 	log.Printf("INFO: Mount(%s)", r.Name)
 	d.m.Lock()
 	defer d.m.Unlock()
@@ -414,7 +414,7 @@ func (d cephRBDVolumeDriver) List() (*dkvolume.ListResponse, error) {
 //    path on the host filesystem where the volume has been made available,
 //    and/or a string error if an error occurred.
 //
-func (d cephRBDVolumeDriver) Get(r dkvolume.GetRequest) (*dkvolume.GetResponse, error) {
+func (d cephRBDVolumeDriver) Get(r *dkvolume.GetRequest) (*dkvolume.GetResponse, error) {
 	// parse full image name for optional/default pieces
 	pool, name, _, err := d.parseImagePoolNameSize(r.Name)
 	if err != nil {
@@ -454,7 +454,7 @@ func (d cephRBDVolumeDriver) Get(r dkvolume.GetRequest) (*dkvolume.GetResponse, 
 //    Respond with the path on the host filesystem where the volume has been
 //    made available, and/or a string error if an error occurred.
 //
-func (d cephRBDVolumeDriver) Path(r dkvolume.PathRequest) (*dkvolume.PathResponse, error) {
+func (d cephRBDVolumeDriver) Path(r *dkvolume.PathRequest) (*dkvolume.PathResponse, error) {
 	// parse full image name for optional/default pieces
 	pool, name, _, err := d.parseImagePoolNameSize(r.Name)
 	if err != nil {
@@ -483,7 +483,7 @@ func (d cephRBDVolumeDriver) Path(r dkvolume.PathRequest) (*dkvolume.PathRespons
 //    { "Err": null }
 //    Respond with a string error if an error occurred.
 //
-func (d cephRBDVolumeDriver) Unmount(r dkvolume.UnmountRequest) error {
+func (d cephRBDVolumeDriver) Unmount(r *dkvolume.UnmountRequest) error {
 	log.Printf("INFO: Unmount(%s)", r.Name)
 	d.m.Lock()
 	defer d.m.Unlock()
