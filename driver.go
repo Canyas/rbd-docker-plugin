@@ -292,7 +292,7 @@ func (d cephRBDVolumeDriver) Remove(r dkvolume.RemoveRequest) error {
 //    Respond with the path on the host filesystem where the volume has been
 //    made available, and/or a string error if an error occurred.
 //
-func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) dkvolume.MountResponse, error {
+func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) (dkvolume.MountResponse, error) {
 	log.Printf("INFO: Mount(%s)", r.Name)
 	d.m.Lock()
 	defer d.m.Unlock()
@@ -385,7 +385,7 @@ func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) dkvolume.MountRespon
 //    respective paths on the host filesystem (where the volumes have been
 //    made available).
 //
-func (d cephRBDVolumeDriver) List() dkvolume.ListResponse, error {
+func (d cephRBDVolumeDriver) List() (dkvolume.ListResponse, error) {
 	vols := make([]*dkvolume.Volume, 0, len(d.volumes))
 	// for each registered mountpoint
 	for k, v := range d.volumes {
@@ -414,7 +414,7 @@ func (d cephRBDVolumeDriver) List() dkvolume.ListResponse, error {
 //    path on the host filesystem where the volume has been made available,
 //    and/or a string error if an error occurred.
 //
-func (d cephRBDVolumeDriver) Get(r dkvolume.GetRequest) dkvolume.GetResponse, error {
+func (d cephRBDVolumeDriver) Get(r dkvolume.GetRequest) (dkvolume.GetResponse, error) {
 	// parse full image name for optional/default pieces
 	pool, name, _, err := d.parseImagePoolNameSize(r.Name)
 	if err != nil {
@@ -454,7 +454,7 @@ func (d cephRBDVolumeDriver) Get(r dkvolume.GetRequest) dkvolume.GetResponse, er
 //    Respond with the path on the host filesystem where the volume has been
 //    made available, and/or a string error if an error occurred.
 //
-func (d cephRBDVolumeDriver) Path(r dkvolume.PathRequest) dkvolume.PathResponse, error {
+func (d cephRBDVolumeDriver) Path(r dkvolume.PathRequest) (dkvolume.PathResponse, error) {
 	// parse full image name for optional/default pieces
 	pool, name, _, err := d.parseImagePoolNameSize(r.Name)
 	if err != nil {
