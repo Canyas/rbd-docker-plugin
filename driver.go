@@ -368,7 +368,7 @@ func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) (*dkvolume.MountResp
 		pool:   pool,
 	}
 
-	return dkvolume.MountResponse{Mountpoint: mount}, nil
+	return &dkvolume.MountResponse{Mountpoint: mount}, nil
 }
 
 // Get the list of volumes registered with the plugin.
@@ -397,7 +397,7 @@ func (d cephRBDVolumeDriver) List() (*dkvolume.ListResponse, error) {
 	}
 
 	log.Printf("INFO: List request => %s", vols)
-	return dkvolume.ListResponse{Volumes: vols}, nil
+	return &dkvolume.ListResponse{Volumes: vols}, nil
 }
 
 // Get the volume info.
@@ -438,7 +438,7 @@ func (d cephRBDVolumeDriver) Get(r dkvolume.GetRequest) (*dkvolume.GetResponse, 
 
 	// TODO: what to do if the mountpoint registry (d.volumes) has a different name?
 
-	return dkvolume.GetResponse{Volume: &dkvolume.Volume{Name: r.Name, Mountpoint: mountPath}}, nil
+	return &dkvolume.GetResponse{Volume: &dkvolume.Volume{Name: r.Name, Mountpoint: mountPath}}, nil
 }
 
 // Path returns the path to host directory mountpoint for volume.
@@ -466,7 +466,7 @@ func (d cephRBDVolumeDriver) Path(r dkvolume.PathRequest) (*dkvolume.PathRespons
 
 	mountPath := d.mountpoint(pool, name)
 	log.Printf("INFO: Path request(%s) => %s", name, mountPath)
-	return dkvolume.PathResponse{Mountpoint: mountPath}, nil
+	return &dkvolume.PathResponse{Mountpoint: mountPath}, nil
 }
 
 // POST /VolumeDriver.Unmount
