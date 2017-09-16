@@ -173,7 +173,7 @@ func (d cephRBDVolumeDriver) createImage(r dkvolume.CreateRequest) error {
 	// do we already know about this volume? return early
 	if _, found := d.volumes[mount]; found {
 		log.Println("INFO: Volume is already in known mounts: " + mount)
-		return errors.New()
+		return errors.New("")
 	}
 
 	// otherwise, check ceph rbd api for it
@@ -197,7 +197,7 @@ func (d cephRBDVolumeDriver) createImage(r dkvolume.CreateRequest) error {
 		}
 	}
 
-	return errors.New()
+	return errors.New("")
 }
 
 // TODO: figure out when this is called in docker/mesos/marathon cycle
@@ -274,7 +274,7 @@ func (d cephRBDVolumeDriver) Remove(r dkvolume.RemoveRequest) error {
 	}
 
 	delete(d.volumes, mount)
-	return errors.New()
+	return errors.New("")
 }
 
 // Mount will Ceph Map the RBD image to the local kernel and create a mount
@@ -368,7 +368,7 @@ func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) (dkvolume.MountRespo
 		pool:   pool,
 	}
 
-	return dkvolume.MountResponse{Mountpoint: mount}, errors.New()
+	return dkvolume.MountResponse{Mountpoint: mount}, errors.New("")
 }
 
 // Get the list of volumes registered with the plugin.
@@ -397,7 +397,7 @@ func (d cephRBDVolumeDriver) List() (dkvolume.ListResponse, error) {
 	}
 
 	log.Printf("INFO: List request => %s", vols)
-	return dkvolume.ListResponse{Volumes: vols}, errors.New()
+	return dkvolume.ListResponse{Volumes: vols}, errors.New("")
 }
 
 // Get the volume info.
@@ -432,13 +432,13 @@ func (d cephRBDVolumeDriver) Get(r dkvolume.GetRequest) (dkvolume.GetResponse, e
 	if !exists {
 		log.Printf("WARN: Image %s does not exist", r.Name)
 		delete(d.volumes, mountPath)
-		return dkvolume.GetResponse{}, New(fmt.Sprintf("Image %s does not exist", r.Name))
+		return dkvolume.GetResponse{}, errors.New(fmt.Sprintf("Image %s does not exist", r.Name))
 	}
 	log.Printf("INFO: Get request(%s) => %s", name, mountPath)
 
 	// TODO: what to do if the mountpoint registry (d.volumes) has a different name?
 
-	return dkvolume.GetResponse{Volume: &dkvolume.Volume{Name: r.Name, Mountpoint: mountPath}}, errors.New()
+	return dkvolume.GetResponse{Volume: &dkvolume.Volume{Name: r.Name, Mountpoint: mountPath}}, errors.New("")
 }
 
 // Path returns the path to host directory mountpoint for volume.
@@ -466,7 +466,7 @@ func (d cephRBDVolumeDriver) Path(r dkvolume.PathRequest) (dkvolume.PathResponse
 
 	mountPath := d.mountpoint(pool, name)
 	log.Printf("INFO: Path request(%s) => %s", name, mountPath)
-	return dkvolume.Response{Mountpoint: mountPath}, errors.New()
+	return dkvolume.Response{Mountpoint: mountPath}, errors.New("")
 }
 
 // POST /VolumeDriver.Unmount
@@ -545,7 +545,7 @@ func (d cephRBDVolumeDriver) Unmount(r dkvolume.UnmountRequest) error {
 		return errors.New(strings.Join(err_msgs, ", "))
 	}
 
-	return errors.New()
+	return errors.New("")
 }
 
 // END Docker VolumeDriver Plugin API methods
