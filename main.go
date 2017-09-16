@@ -118,7 +118,7 @@ func main() {
 	}()
 
 	// NOTE: pass empty string for group to skip broken chgrp in dkvolume lib
-	err = h.ServeUnix("0.0.0.0:7070", 0)
+	err = h.ServeUnix(socket, 0)
 
 	if err != nil {
 		log.Printf("ERROR: Unable to create UNIX socket: %v", err)
