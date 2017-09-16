@@ -54,7 +54,7 @@ type volume struct {
 	//clientid string
 }
 
-type cephRBDVolumeDriver struct {
+type cephRBDVolumeDriver struct { dkvolume.Driver
 	// - using default ceph cluster name ("ceph")
 	// - using default ceph config (/etc/ceph/<cluster>.conf)
 	//
@@ -173,7 +173,7 @@ func (d cephRBDVolumeDriver) createImage(r dkvolume.CreateRequest) error {
 	// do we already know about this volume? return early
 	if _, found := d.volumes[mount]; found {
 		log.Println("INFO: Volume is already in known mounts: " + mount)
-		return errors.New("")
+		return nil
 	}
 
 	// otherwise, check ceph rbd api for it
@@ -197,7 +197,7 @@ func (d cephRBDVolumeDriver) createImage(r dkvolume.CreateRequest) error {
 		}
 	}
 
-	return errors.New("")
+	return nil
 }
 
 // TODO: figure out when this is called in docker/mesos/marathon cycle
@@ -274,7 +274,7 @@ func (d cephRBDVolumeDriver) Remove(r dkvolume.RemoveRequest) error {
 	}
 
 	delete(d.volumes, mount)
-	return errors.New("")
+	return nil
 }
 
 // Mount will Ceph Map the RBD image to the local kernel and create a mount
@@ -292,7 +292,7 @@ func (d cephRBDVolumeDriver) Remove(r dkvolume.RemoveRequest) error {
 //    Respond with the path on the host filesystem where the volume has been
 //    made available, and/or a string error if an error occurred.
 //
-func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) (dkvolume.MountResponse, error) {
+func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) (*dkvolume.MountResponse, error) {
 	log.Printf("INFO: Mount(%s)", r.Name)
 	d.m.Lock()
 	defer d.m.Unlock()
@@ -301,7 +301,7 @@ func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) (dkvolume.MountRespo
 	pool, name, _, err := d.parseImagePoolNameSize(r.Name)
 	if err != nil {
 		log.Printf("ERROR: parsing volume: %s", err)
-		return dkvolume.MountResponse{}, err
+		return nil, err
 	}
 
 	mount := d.mountpoint(pool, name)
@@ -317,7 +317,7 @@ func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) (dkvolume.MountRespo
 	locker, err := d.lockImage(pool, name)
 	if err != nil {
 		log.Printf("ERROR: locking RBD Image(%s): %s", name, err)
-		return dkvolume.MountResponse{}, errors.New("Unable to get Exlusive Lock")
+		return nil, errors.New("Unable to get Exlusive Lock")
 	}
 
 	// map and mount the RBD image -- these are OS level Ceph commands, not avail in go-ceph
@@ -328,7 +328,7 @@ func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) (dkvolume.MountRespo
 		log.Printf("ERROR: mapping RBD Image(%s) to kernel device: %s", name, err)
 		// failsafe: need to release lock
 		defer d.unlockImage(pool, name, locker)
-		return dkvolume.MountResponse{}, errors.New("Unable to map")
+		return nil, errors.New("Unable to map")
 	}
 
 	// determine device FS type
@@ -346,7 +346,7 @@ func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) (dkvolume.MountRespo
 		// failsafe: need to release lock and unmap kernel device
 		defer d.unmapImageDevice(device)
 		defer d.unlockImage(pool, name, locker)
-		return dkvolume.MountResponse{}, errors.New("Unable to make mountdir")
+		return nil, errors.New("Unable to make mountdir")
 	}
 
 	// mount
@@ -356,7 +356,7 @@ func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) (dkvolume.MountRespo
 		// need to release lock and unmap kernel device
 		defer d.unmapImageDevice(device)
 		defer d.unlockImage(pool, name, locker)
-		return dkvolume.MountResponse{}, errors.New("Unable to mount device")
+		return nil, errors.New("Unable to mount device")
 	}
 
 	// if all that was successful - add to our list of volumes
@@ -368,7 +368,7 @@ func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) (dkvolume.MountRespo
 		pool:   pool,
 	}
 
-	return dkvolume.MountResponse{Mountpoint: mount}, errors.New("")
+	return dkvolume.MountResponse{Mountpoint: mount}, nil
 }
 
 // Get the list of volumes registered with the plugin.
@@ -385,7 +385,7 @@ func (d cephRBDVolumeDriver) Mount(r dkvolume.MountRequest) (dkvolume.MountRespo
 //    respective paths on the host filesystem (where the volumes have been
 //    made available).
 //
-func (d cephRBDVolumeDriver) List() (dkvolume.ListResponse, error) {
+func (d cephRBDVolumeDriver) List() (*dkvolume.ListResponse, error) {
 	vols := make([]*dkvolume.Volume, 0, len(d.volumes))
 	// for each registered mountpoint
 	for k, v := range d.volumes {
@@ -397,7 +397,7 @@ func (d cephRBDVolumeDriver) List() (dkvolume.ListResponse, error) {
 	}
 
 	log.Printf("INFO: List request => %s", vols)
-	return dkvolume.ListResponse{Volumes: vols}, errors.New("")
+	return dkvolume.ListResponse{Volumes: vols}, nil
 }
 
 // Get the volume info.
@@ -414,31 +414,31 @@ func (d cephRBDVolumeDriver) List() (dkvolume.ListResponse, error) {
 //    path on the host filesystem where the volume has been made available,
 //    and/or a string error if an error occurred.
 //
-func (d cephRBDVolumeDriver) Get(r dkvolume.GetRequest) (dkvolume.GetResponse, error) {
+func (d cephRBDVolumeDriver) Get(r dkvolume.GetRequest) (*dkvolume.GetResponse, error) {
 	// parse full image name for optional/default pieces
 	pool, name, _, err := d.parseImagePoolNameSize(r.Name)
 	if err != nil {
 		log.Printf("ERROR: parsing volume: %s", err)
-		return dkvolume.GetResponse{}, err
+		return nil, err
 	}
 
 	// Check to see if the image exists
 	exists, err := d.rbdImageExists(pool, name)
 	if err != nil {
 		log.Printf("WARN: checking for RBD Image: %s", err)
-		return dkvolume.GetResponse{}, err
+		return nil, err
 	}
 	mountPath := d.mountpoint(pool, name)
 	if !exists {
 		log.Printf("WARN: Image %s does not exist", r.Name)
 		delete(d.volumes, mountPath)
-		return dkvolume.GetResponse{}, errors.New(fmt.Sprintf("Image %s does not exist", r.Name))
+		return nil, errors.New(fmt.Sprintf("Image %s does not exist", r.Name))
 	}
 	log.Printf("INFO: Get request(%s) => %s", name, mountPath)
 
 	// TODO: what to do if the mountpoint registry (d.volumes) has a different name?
 
-	return dkvolume.GetResponse{Volume: &dkvolume.Volume{Name: r.Name, Mountpoint: mountPath}}, errors.New("")
+	return dkvolume.GetResponse{Volume: &dkvolume.Volume{Name: r.Name, Mountpoint: mountPath}}, nil
 }
 
 // Path returns the path to host directory mountpoint for volume.
@@ -454,19 +454,19 @@ func (d cephRBDVolumeDriver) Get(r dkvolume.GetRequest) (dkvolume.GetResponse, e
 //    Respond with the path on the host filesystem where the volume has been
 //    made available, and/or a string error if an error occurred.
 //
-func (d cephRBDVolumeDriver) Path(r dkvolume.PathRequest) (dkvolume.PathResponse, error) {
+func (d cephRBDVolumeDriver) Path(r dkvolume.PathRequest) (*dkvolume.PathResponse, error) {
 	// parse full image name for optional/default pieces
 	pool, name, _, err := d.parseImagePoolNameSize(r.Name)
 	if err != nil {
 		log.Printf("ERROR: parsing volume: %s", err)
-		return dkvolume.PathRequest{}, err
+		return nil, err
 	}
 
 	// TODO: should we return only known mapped vols? (e.g. d.volumes[r.Name] ...) ?
 
 	mountPath := d.mountpoint(pool, name)
 	log.Printf("INFO: Path request(%s) => %s", name, mountPath)
-	return dkvolume.Response{Mountpoint: mountPath}, errors.New("")
+	return dkvolume.PathResponse{Mountpoint: mountPath}, nil
 }
 
 // POST /VolumeDriver.Unmount
@@ -545,7 +545,7 @@ func (d cephRBDVolumeDriver) Unmount(r dkvolume.UnmountRequest) error {
 		return errors.New(strings.Join(err_msgs, ", "))
 	}
 
-	return errors.New("")
+	return nil
 }
 
 // END Docker VolumeDriver Plugin API methods
