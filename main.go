@@ -80,7 +80,7 @@ func main() {
 	defer d.shutdown()
 
 	log.Println("INFO: Creating Docker VolumeDriver Handler")
-	h := NewHandler(d)
+	h := dkvolume.NewHandler(d)
 
 	socket := socketPath()
 	log.Printf("INFO: Opening Socket for Docker to connect: %s", socket)
