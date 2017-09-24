@@ -711,12 +711,14 @@ func (d *cephRBDVolumeDriver) rbdImageExists(pool, findName string) (bool, error
 		return false, fmt.Errorf("Empty Ceph RBD Image name")
 	}
 
+	log.Println("OpenContext")
 	ctx, err := d.openContext(pool)
 	if err != nil {
 		return false, err
 	}
 	defer d.shutdownContext(ctx)
 
+	log.Println("GetImage")
 	img := rbd.GetImage(ctx, findName)
 	err = img.Open(true)
 	defer img.Close()
