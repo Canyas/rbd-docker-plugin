@@ -10,7 +10,7 @@ import (
 	"os"
 	"testing"
 
-        dkvolume "github.com/docker/go-plugins-helpers/volume"
+        dkvolume "github.com/Canyas/go-plugins-helpers/volume"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 	"syscall"
 
-	dkvolume "github.com/docker/go-plugins-helpers/volume"
+	dkvolume "github.com/Canyas/go-plugins-helpers/volume"
 )
 
 var (

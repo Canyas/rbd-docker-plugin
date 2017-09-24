@@ -37,7 +37,7 @@ import (
 
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
-	dkvolume "github.com/docker/go-plugins-helpers/volume"
+	dkvolume "github.com/Canyas/go-plugins-helpers/volume"
 )
 
 var (
