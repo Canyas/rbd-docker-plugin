@@ -755,6 +755,7 @@ func (d *cephRBDVolumeDriver) createRBDImage(pool string, name string, size int,
 		"--pool", pool,
 		"--image-format", strconv.Itoa(2),
 		"--size", strconv.Itoa(size),
+		"--image-feature" "layering",
 		name,
 	)
 	if err != nil {
